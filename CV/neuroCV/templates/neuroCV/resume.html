@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<div class="resume-paper">
+    <div class="resume-header">
+        <h1>{{ cv.full_name|upper }}</h1>
+        <p class="contact-info">
+            <i class="fa-solid fa-envelope"></i> {{ cv.email }} | 
+            <i class="fa-solid fa-phone"></i> {{ cv.phone }}
+        </p>
+    </div>
+
+    <div class="resume-section">
+        <h3>Professional Profile</h3>
+        <div class="ai-content">
+            {{ cv.ai_content|linebreaks }}
+        </div>
+    </div>
+
+    <div class="resume-section">
+        <h3>Education</h3>
+        <div class="entry">
+            <div class="entry-header">
+                <strong>{{ cv.university }}</strong>
+                <span class="date">{{ cv.year }}</span>
+            </div>
+            <div class="entry-sub">
+                <em>{{ cv.course }}</em>
+                <span>Score: {{ cv.score }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="resume-section">
+        <h3>Professional Experience</h3>
+        <div class="entry">
+            <div class="entry-header">
+                <strong>{{ cv.company }}</strong>
+                <span class="date">{{ cv.duration }}</span>
+            </div>
+            <div class="entry-sub">
+                <em>{{ cv.role }}</em>
+            </div>
+            <div class="responsibilities-text">
+                {{ cv.responsibilities|linebreaks }}
+            </div>
+        </div>
+    </div>
+
+    <div class="resume-section">
+        <h3>Core Competencies</h3>
+        <p class="skills-list">{{ cv.skills }}</p>
+    </div>
+
+    {% if cv.ref1_name %}
+    <div class="resume-section">
+        <h3>References</h3>
+        <div class="referee-grid">
+            <div class="ref-item">
+                <strong>{{ cv.ref1_name }}</strong><br>
+                {{ cv.ref1_job }}<br>
+                {{ cv.ref1_contact }}
+            </div>
+            {% if cv.ref2_name %}
+            <div class="ref-item">
+                <strong>{{ cv.ref2_name }}</strong><br>
+                {{ cv.ref2_job }}<br>
+                {{ cv.ref2_contact }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="resume-footer">
+        <p>I certify that the information provided above is true to the best of my knowledge.</p>
+    </div>
+
+    <div class="no-print actions">
+        <button onclick="window.print()" class="btn-print">
+            <i class="fa-solid fa-file-pdf"></i> Download as PDF
+        </button>
+        <a href="{% url 'dashboard' %}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<style>
+    :root {
+        --resume-blue: #2563eb;
+        --text-dark: #1f2937;
+        --text-light: #4b5563;
+    }
+
+    .resume-paper {
+        background: white;
+        padding: 60px;
+        max-width: 850px; /* Standard A4 ratio width */
+        margin: 20px auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        font-family: 'Inter', sans-serif;
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+
+    /* Header Styling */
+    .resume-header { text-align: center; margin-bottom: 30px; }
+    .resume-header h1 { 
+        font-family: 'Libre Baskerville', serif; 
+        font-size: 2.2rem; 
+        margin-bottom: 5px; 
+        letter-spacing: 1px;
+    }
+    .contact-info { color: var(--text-light); font-size: 0.95rem; }
+
+    /* Section Styling */
+    .resume-section { margin-bottom: 25px; }
+    .resume-section h3 { 
+        border-bottom: 1.5px solid var(--resume-blue); 
+        color: var(--resume-blue); 
+        text-transform: uppercase;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        padding-bottom: 3px;
+    }
+
+    /* Entries */
+    .entry { margin-bottom: 15px; }
+    .entry-header { display: flex; justify-content: space-between; font-size: 1.05rem; }
+    .entry-sub { display: flex; justify-content: space-between; color: var(--text-light); font-size: 0.95rem; margin-bottom: 5px; }
+    .responsibilities-text { font-size: 0.95rem; margin-top: 8px; }
+
+    /* Referees */
+    .referee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.9rem; }
+
+    .resume-footer { 
+        margin-top: 40px; 
+        border-top: 1px solid #eee; 
+        padding-top: 10px; 
+        font-size: 0.8rem; 
+        font-style: italic; 
+        text-align: center;
+        color: var(--text-light);
+    }
+
+    /* Action Buttons */
+    .actions { margin-top: 40px; display: flex; gap: 15px; justify-content: center; }
+    .btn-print, .btn-back {
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: 0.3s;
+    }
+    .btn-print { background: var(--resume-blue); color: white; }
+    .btn-print:hover { background: #1d4ed8; }
+    .btn-back { background: #f3f4f6; color: var(--text-dark); }
+
+    /* PRINT RULES: CRITICAL */
+    @media print {
+        body { background: white !important; padding: 0 !important; }
+        .no-print { display: none !important; }
+        .resume-paper { 
+            box-shadow: none !important; 
+            padding: 0 !important; 
+            margin: 0 !important; 
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        @page { size: A4; margin: 1.5cm; }
+    }
+</style>
+{% endblock %}

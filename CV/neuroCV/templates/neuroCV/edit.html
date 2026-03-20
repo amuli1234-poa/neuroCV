@@ -1,0 +1,39 @@
+{% include 'base.html' %}
+{% block content %}
+<div class="form-container">
+    <h2>Edit Resume: {{ cv.full_name }}</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+
+        <h3>Personal Information</h3>
+        <label>Full Name</label>
+        <input type="text" name="full_name" value="{{ cv.full_name }}">
+
+        <label>Email Address</label>
+        <input type="email" name="email" value="{{ cv.email }}">
+
+        <label>Phone No</label>
+        <input type="tel" name="phone" value="{{ cv.phone }}">
+
+        <h3>Educational Background</h3>
+        <label>University</label>
+        <input type="text" name="university" value="{{ cv.university }}">
+
+        <label>Course</label>
+        <input type="text" name="course" value="{{ cv.course }}">
+
+        <h3>Experience</h3>
+        <label>Responsibilities</label>
+        <textarea name="responsibilities">{{ cv.responsibilities }}</textarea>
+
+        <h3>Referees</h3>
+        <label>Referee 1 Name</label>
+        <input type="text" name="ref1_name" value="{{ cv.ref1_name }}">
+
+        <button type="submit" class="submit-btn">Update & Save Changes</button>
+        <a href="{% url 'dashboard' %}" style="display:block; text-align:center; margin-top:10px; color:var(--text-muted);">Cancel</a>
+    </form>
+</div>
+{% endblock %}
+
