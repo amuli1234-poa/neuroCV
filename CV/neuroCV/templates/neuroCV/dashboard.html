@@ -1,74 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="resume-paper">
-    <div class="resume-header">
-        <h1>{{ cv.full_name|upper }}</h1>
-        <p>{{ cv.email }} | {{ cv.phone }}</p>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Resumes</h2>
+        <a href="{% url 'home' %}" class="btn btn-primary">+ Create New Resume</a>
     </div>
 
-    <hr>
-
-    <div class="resume-section">
-        <h3>Professional Profile</h3>
-        <p>{{ cv.ai_content|linebreaks }}</p>
-    </div>
-
-    <div class="resume-section">
-        <h3>Education</h3>
-        <div class="entry">
-            <strong>{{ cv.university }}</strong> — <em>{{ cv.course }}</em>
-            <span class="date">Class of {{ cv.year }}</span>
-            <p>Grade/Score: {{ cv.score }}</p>
-        </div>
-    </div>
-
-    <div class="resume-section">
-        <h3>Work Experience</h3>
-        <div class="entry">
-            <strong>{{ cv.company }}</strong> | {{ cv.role }}
-            <span class="date">{{ cv.duration }}</span>
-            
-            <p><strong>Key Contributions:</strong></p>
-            {{ cv.responsibilities|linebreaks }}
-        </div>
-    </div>
-
-    <div class="resume-section">
-        <h3>Core Competencies</h3>
-        <p>{{ cv.skills }}</p>
-    </div>
-
-    <div class="no-print" style="margin-top: 30px; text-align: center;">
-        <button onclick="window.print()" class="btn-print">Download as PDF</button>
-        <a href="{% url 'dashboard' %}" class="btn-back">Back to Dashboard</a>
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Company/Role</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cv in cvs %}
+                <tr>
+                    <td><strong>{{ cv.full_name }}</strong></td>
+                    <td>{{ cv.company }} - {{ cv.role }}</td>
+                    <td>{{ cv.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'resume_detail' cv.pk %}" class="btn btn-outline-info">View</a>
+                            <a href="{% url 'edit_resume' cv.pk %}" class="btn btn-outline-warning">Edit</a>
+                            <a href="{% url 'delete_resume' cv.pk %}" class="btn btn-outline-danger">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">No resumes found. Start by creating one!</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
 <style>
-    .resume-paper {
-        background: white;
-        padding: 40px;
-        max-width: 800px;
-        margin: auto;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        min-height: 1000px;
-    }
-    .resume-header { text-align: center; margin-bottom: 20px; }
-    .resume-section { margin-bottom: 25px; }
-    .resume-section h3 { 
-        border-bottom: 2px solid #2563eb; 
-        color: #2563eb; 
-        text-transform: uppercase;
-        font-size: 1.1rem;
-    }
-    .entry { margin-top: 10px; position: relative; }
-    .date { float: right; color: #666; font-size: 0.9rem; }
-    
-    @media print {
-        body { background: white; }
-        .no-print { display: none; }
-        .resume-paper { box-shadow: none; padding: 0; }
-    }
+    body { background-color: #f4f7f6; }
+    .table th { border: none; }
+    .btn-group .btn { padding: 5px 15px; }
 </style>
 {% endblock %}

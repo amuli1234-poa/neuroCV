@@ -21,7 +21,7 @@ class ResumeAdmin(admin.ModelAdmin):
             'fields': ('university', 'course', 'score', 'year')
         }),
         ('Work Experience', {
-            'fields': ('company', 'role', 'duration', 'responsibilities', 'ai_content')
+            'fields': ('company', 'role', 'duration', 'responsibilities', 'ai_bullet')
         }),
         ('Skills', {
             'fields': ('skills',)

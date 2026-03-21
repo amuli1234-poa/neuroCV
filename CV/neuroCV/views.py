@@ -1,23 +1,18 @@
-import google.generativeai as genai
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Resume
-# from django_daraja.mpesa.core import MpesaClient
-# from django.http import HttpResponse
-# import json
-# from django.views.decorators.csrf import csrf_exempt
-# from django.http import JsonResponse
+from google.genai import Client
+import logging
 
-# 1. Setup your API Key
-# Replace the string below with your actual API key from Google AI Studio
-genai.configure(api_key="AIzaSyBcmd7naXxewOQjwk-xQG_bxnfCl5tHpRs")
+# Set up logging
+logger = logging.getLogger(__name__)
 
-from django.shortcuts import render, redirect
-from .models import Resume
-import google.generativeai as genai
+# 1. Setup the Client
+API_KEY = "AIzaSyDjlCTjDFv3oqxtRXRiM10G-D918BjG0hM"
+client = Client(api_key=API_KEY)
 
 def neuroCV(request):
     if request.method == 'POST':
-        # 1. Capture all data from your form fields
+        # 1. Capture data
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone = request.POST.get('phone')
@@ -31,29 +26,20 @@ def neuroCV(request):
         responsibilities = request.POST.get('responsibilities')
         skills = request.POST.get('skills')
 
-        # 2. AI Integration using 'gemini-pro'
-        ai_content = ""
+        # 2. AI Integration (with safety fallback)
+        ai_content = "AI was busy, but your data is saved! Please edit to add details."
         try:
-            model = genai.GenerativeModel('gemini-pro')
-            prompt = f"""
-            You are an expert Executive Resume Writer. 
-            Rewrite the following "Responsibilities" into 3 professional, 
-            high-impact bullet points starting with strong action verbs.
-            
-            Role: {role}
-            Company: {company}
-            Input: {responsibilities}
-            
-            Also, provide a 2-line professional summary for this person.
-            """
-            response = model.generate_content(prompt)
-            ai_content = response.text
+            prompt = f"Rewrite into 3 bullet points: {responsibilities}"
+            response = client.models.generate_content(
+                model="gemini-2.0-flash", 
+                contents=prompt
+            )
+            if response and response.text:
+                ai_content = response.text
         except Exception as e:
-            print(f"AI Error: {e}")
-            ai_content = "Professional summary will be available soon."
+            print(f"--- AI ERROR: {e} ---")
 
-        # 3. CRITICAL STEP: Save to Database
-        # This makes the data appear in the Dashboard and Admin Panel
+        # 3. Create the object
         new_resume = Resume.objects.create(
             full_name=full_name,
             email=email,
@@ -67,100 +53,42 @@ def neuroCV(request):
             duration=duration,
             responsibilities=responsibilities,
             skills=skills,
-            ai_content=ai_content  # Saving the AI result too!
+            ai_bullet=ai_content,
+            is_paid=False
         )
 
-        # 4. Redirect to the Preview page using the NEW ID
-        # It's better to redirect to a 'resume_preview' view so the URL is clean
-        return redirect('resume', pk=new_resume.id)
+        # IMPORTANT: This must be indented INSIDE the 'if POST' block
+        return redirect('resume_detail', pk=new_resume.id)
 
+    # This handles the initial GET request
     return render(request, 'neuroCV/neuroCV.html')
-
-# 5. Add a view to show the specific Resume after saving
-def resume(request, pk):
-    resume = Resume.objects.get(pk= pk)
-    
-    return render(request, 'neuroCV/resume.html', {'cv': resume})
-
 def dashboard(request):
-    resumes = Resume.objects.all().order_by('-created_at')
-    return render(request, 'neuroCV/dashboard.html', {'resumes': resumes})
-# 2. DELETE
-def delete_cv(request, cv_id):
-    cv = get_object_or_404(Resume, id=cv_id)
-    cv.delete()
-    return redirect('dashboard')
+    # Fetch all resumes ordered by newest first
+    resumes = Resume.objects.all().order_by('-id') 
+    return render(request, 'neuroCV/dashboard.html', {'cvs': resumes})
 
-# 3. UPDATE (Edit an existing CV)
-def edit_cv(request, cv_id):
-    cv = get_object_or_404(Resume, id=cv_id)
-    
-    if request.method == 'POST':
-        # Update the existing object with new data from the form
-        cv.full_name = request.POST.get('full_name')
-        cv.email = request.POST.get('email')
-        cv.phone = request.POST.get('phone')
-        cv.university = request.POST.get('university')
-        cv.course = request.POST.get('course')
-        cv.score = request.POST.get('score')
-        cv.year = request.POST.get('year')
-        cv.company = request.POST.get('company')
-        cv.role = request.POST.get('role')
-        cv.duration = request.POST.get('duration')
-        cv.responsibilities = request.POST.get('responsibilities')
-        cv.skills = request.POST.get('skills')
-        cv.save()
+def resume_detail(request, pk):
+    cv_data = get_object_or_404(Resume, pk=pk)
+    return render(request, 'neuroCV/resume.html', {'cv': cv_data})
+
+def delete_resume(request, pk):
+    resume = get_object_or_404(Resume, pk=pk)
+    if request.method == "POST":
+        resume.delete()
         return redirect('dashboard')
-        
-    return render(request, 'neuroCV/edit_cv.html', {'cv': cv})
+    # If your template is in neuroCV folder, keep the prefix
+    return render(request, 'neuroCV/delete_confirm.html', {'resume': resume})
 
-
-# def initiate_stk_push(request, cv_id):
-#     # 1. Get the Resume record
-#     resume = get_object_or_404(Resume, id=cv_id)
+def edit_resume(request, pk):
+    resume = get_object_or_404(Resume, pk=pk)
+    if request.method == "POST":
+        resume.full_name = request.POST.get('full_name')
+        resume.email = request.POST.get('email')
+        resume.phone = request.POST.get('phone')
+        resume.company = request.POST.get('company')
+        resume.role = request.POST.get('role')
+        # Add any other fields you want to be editable here
+        resume.save()
+        return redirect('dashboard')
     
-#     # 2. Format Phone Number (Daraja needs 2547XXXXXXXX)
-#     phone = resume.phone.replace("+", "")
-#     if phone.startswith("0"):
-#         phone = "254" + phone[1:]
-    
-#     # 3. Initialize Mpesa Client
-#     cl = MpesaClient()
-#     amount = 1  # Amount in KES (Use 1 for testing)
-#     account_reference = 'NeuroCV_Ref'
-#     transaction_desc = f'Payment for {resume.full_name} CV'
-    
-#     # 4. Set Callback URL (Safaricom sends the result here)
-#     # Note: Use your Ngrok URL here during local testing
-#     callback_url = 'https://your-domain.com/mpesa/callback/'
-    
-#     # 5. Send Request
-#     response = cl.stk_push(phone, amount, account_reference, transaction_desc, callback_url)
-    
-#     if response.response_code == "0":
-#         # Save the CheckoutRequestID to identify this transaction later
-#         resume.checkout_request_id = response.checkout_request_id
-#         resume.save()
-#         return HttpResponse("Check your phone for the M-Pesa PIN prompt!")
-#     else:
-#         return HttpResponse(f"Error: {response.response_description}")
-
-# @csrf_exempt
-# def mpesa_callback(request):
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-#         stk_callback = data['Body']['stkCallback']
-#         result_code = stk_callback['ResultCode']
-#         checkout_request_id = stk_callback['CheckoutRequestID']
-
-#         # ResultCode 0 means the user entered the PIN and payment was successful
-#         if result_code == 0:
-#             try:
-#                 resume = Resume.objects.get(checkout_request_id=checkout_request_id)
-#                 resume.is_paid = True
-#                 resume.save()
-#                 print(f"Payment Successful for {resume.full_name}")
-#             except Resume.DoesNotExist:
-#                 print("Error: Resume with this ID not found.")
-
-#         return JsonResponse({"ResultCode": 0, "ResultDesc": "Success"})
+    return render(request, 'neuroCV/edit_resume.html', {'resume': resume})

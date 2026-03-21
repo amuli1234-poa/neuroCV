@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Delete</h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="lead">Are you sure you want to delete the resume for:</p>
+                    <h3 class="text-primary">{{ resume.full_name }}</h3>
+                    <p class="text-muted">This action cannot be undone.</p>
+                    
+                    <form method="POST" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-block">
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="fa-solid fa-trash-can"></i> Yes, Delete Permanently
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card { border-radius: 15px; overflow: hidden; }
+    .btn { border-radius: 8px; font-weight: 600; }
+</style>
+{% endblock %}

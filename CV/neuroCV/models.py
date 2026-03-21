@@ -1,8 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User # For Phase 2 (Logins)
+from django.contrib.auth.models import User
 
 class Resume(models.Model):
-    # Link to a user (optional for now, but good for the future)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     
     # Personal Info
@@ -14,14 +13,17 @@ class Resume(models.Model):
     university = models.CharField(max_length=255)
     course = models.CharField(max_length=255)
     score = models.CharField(max_length=100)
-    year = models.IntegerField()
+    year = models.CharField(max_length=50) # Changed to CharField for flexibility (e.g., "2022-2026")
     
     # Experience
     company = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
     duration = models.CharField(max_length=100)
     responsibilities = models.TextField()
-    ai_content = models.TextField(blank=True, null=True) # Store the AI polished version
+    
+    # AI Fields - Keeping them separate makes your HTML template much cleaner!
+    ai_summary = models.TextField(blank=True, null=True)
+    ai_bullet = models.TextField(blank=True, null=True)
     
     # Skills
     skills = models.TextField()
@@ -35,11 +37,14 @@ class Resume(models.Model):
     ref2_job = models.CharField(max_length=255, blank=True)
     ref2_contact = models.CharField(max_length=255, blank=True)
 
-    # Payment Status (For M-Pesa Phase)
+    # Payment Status
     is_paid = models.BooleanField(default=False)
     checkout_request_id = models.CharField(max_length=100, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-created_at'] # Shows newest resumes first in the dashboard
+
     def __str__(self):
-        return f"{self.full_name}'s Resume"
+        return f"{self.full_name} - {self.role}"
