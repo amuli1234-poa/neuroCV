@@ -2,48 +2,115 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Resumes</h2>
-        <a href="{% url 'home' %}" class="btn btn-primary">+ Create New Resume</a>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">My Workspace</h2>
+            <p class="text-muted">Manage and edit your professional resumes</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-primary btn-lg shadow-sm">
+            <i class="bi bi-plus-lg"></i> Create New Resume
+        </a>
     </div>
 
-    <div class="table-responsive shadow-sm rounded">
-        <table class="table table-hover bg-white">
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Company/Role</th>
-                    <th>Created Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cv in cvs %}
-                <tr>
-                    <td><strong>{{ cv.full_name }}</strong></td>
-                    <td>{{ cv.company }} - {{ cv.role }}</td>
-                    <td>{{ cv.created_at|date:"M d, Y" }}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'resume_detail' cv.pk %}" class="btn btn-outline-info">View</a>
-                            <a href="{% url 'edit_resume' cv.pk %}" class="btn btn-outline-warning">Edit</a>
-                            <a href="{% url 'delete_resume' cv.pk %}" class="btn btn-outline-danger">Delete</a>
+    <div class="row">
+        {% for cv in cvs %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card resume-card h-100 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-circle me-3">
+                            {{ cv.full_name|slice:":1"|upper }}
                         </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center py-4 text-muted">No resumes found. Start by creating one!</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <div>
+                            <h5 class="card-title fw-bold mb-0">{{ cv.full_name }}</h5>
+                            <small class="text-muted">Created {{ cv.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="text-dark fw-semibold small text-uppercase letter-spacing">Current Role</div>
+                        <div class="text-secondary">{{ cv.role }} at {{ cv.company }}</div>
+                    </div>
+
+                    <hr class="opacity-10">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'resume_detail' cv.pk %}" class="btn btn-sm btn-dark px-3">View</a>
+                        <div class="btn-group">
+                            <a href="{% url 'edit_resume' cv.pk %}" class="btn btn-sm btn-outline-warning">Edit</a>
+                            <a href="{% url 'delete_resume' cv.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                <i class="bi bi-file-earmark-text display-1 text-light"></i>
+                <h4 class="mt-3 text-muted">No resumes found</h4>
+                <p>Start your professional journey by creating your first CV.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary mt-2">Get Started</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
 <style>
-    body { background-color: #f4f7f6; }
-    .table th { border: none; }
-    .btn-group .btn { padding: 5px 15px; }
+    :root {
+        --primary-blue: #2563eb;
+        --bg-light: #f8fafc;
+    }
+
+    body { 
+        background-color: var(--bg-light);
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Resume Card Styling */
+    .resume-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 16px;
+    }
+
+    .resume-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+
+    /* Avatar Circle */
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        background-color: var(--primary-blue);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .letter-spacing {
+        letter-spacing: 0.5px;
+        font-size: 0.75rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-blue);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 10px;
+    }
+
+    .btn-outline-warning:hover { color: white; }
+
+    /* Empty State Illustration Style */
+    .empty-state i {
+        font-size: 5rem;
+        color: #e2e8f0;
+    }
 </style>
 {% endblock %}

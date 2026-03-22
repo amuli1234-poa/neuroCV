@@ -40,12 +40,28 @@
 <body>
 
     <nav class="navbar">
+        <nav class="navbar">
         <a href="{% url 'home' %}" class="nav-logo">🧠 NeuroCV</a>
         <div class="nav-links">
             <a href="{% url 'home' %}">Create New</a>
-            <a href="{% url 'dashboard' %}">My Dashboard</a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">My Dashboard</a>
+                <a href="{% url 'password_change' %}">Security</a>
+                
+                <form action="{% url 'logout' %}" method="post" style="display:inline; margin-left: 20px;">
+                    {% csrf_token %}
+                    <button type="submit" style="background:none; border:none; color:#cbd5e1; font-family:inherit; font-size:inherit; cursor:pointer; font-weight:500; padding:0;">
+                        Logout ({{ user.username }})
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+
             <a href="/admin/" target="_blank">Admin Panel</a>
         </div>
+    </nav>
     </nav>
 
     <div class="container">

@@ -1,21 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required # <--- ADD THIS
 from .models import Resume
-from google.genai import Client
 import logging
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# 1. Setup the Client
-API_KEY = "AIzaSyDjlCTjDFv3oqxtRXRiM10G-D918BjG0hM"
-client = Client(api_key=API_KEY)
-
+@login_required
 def neuroCV(request):
     if request.method == 'POST':
         # 1. Capture data
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone = request.POST.get('phone')
+        
+        # New: Capture the manual summary from your form
+        professional_summary = request.POST.get('professional_summary')
+        
         university = request.POST.get('university')
         course = request.POST.get('course')
         score = request.POST.get('score')
@@ -26,21 +27,9 @@ def neuroCV(request):
         responsibilities = request.POST.get('responsibilities')
         skills = request.POST.get('skills')
 
-        # 2. AI Integration (with safety fallback)
-        ai_content = "AI was busy, but your data is saved! Please edit to add details."
-        try:
-            prompt = f"Rewrite into 3 bullet points: {responsibilities}"
-            response = client.models.generate_content(
-                model="gemini-2.0-flash", 
-                contents=prompt
-            )
-            if response and response.text:
-                ai_content = response.text
-        except Exception as e:
-            print(f"--- AI ERROR: {e} ---")
-
-        # 3. Create the object
+        # 2. Create the object
         new_resume = Resume.objects.create(
+            user=request.user, # Assign to the logged-in user
             full_name=full_name,
             email=email,
             phone=phone,
@@ -53,32 +42,35 @@ def neuroCV(request):
             duration=duration,
             responsibilities=responsibilities,
             skills=skills,
-            ai_bullet=ai_content,
+            # Use the captured summary here instead of repeating responsibilities
+            ai_summary=professional_summary, 
             is_paid=False
         )
 
-        # IMPORTANT: This must be indented INSIDE the 'if POST' block
         return redirect('resume_detail', pk=new_resume.id)
 
-    # This handles the initial GET request
     return render(request, 'neuroCV/neuroCV.html')
+
+@login_required # <--- Protects the dashboard
 def dashboard(request):
     # Fetch all resumes ordered by newest first
     resumes = Resume.objects.all().order_by('-id') 
     return render(request, 'neuroCV/dashboard.html', {'cvs': resumes})
 
+@login_required # <--- Protects resume details
 def resume_detail(request, pk):
     cv_data = get_object_or_404(Resume, pk=pk)
     return render(request, 'neuroCV/resume.html', {'cv': cv_data})
 
+@login_required # <--- Protects delete function
 def delete_resume(request, pk):
     resume = get_object_or_404(Resume, pk=pk)
     if request.method == "POST":
         resume.delete()
         return redirect('dashboard')
-    # If your template is in neuroCV folder, keep the prefix
     return render(request, 'neuroCV/delete_confirm.html', {'resume': resume})
 
+@login_required # <--- Protects edit function
 def edit_resume(request, pk):
     resume = get_object_or_404(Resume, pk=pk)
     if request.method == "POST":

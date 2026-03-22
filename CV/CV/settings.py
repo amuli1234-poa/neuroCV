@@ -99,44 +99,25 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-# # ==============================================================================
-# # M-PESA DARAJA CONFIGURATION
-# # ==============================================================================
 
-# # 1. Environment: 'sandbox' for testing, 'production' for live
-# MPESA_ENVIRONMENT = 'sandbox'
+# This tells Django where to look for global static files
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
-# # 2. Credentials (Replace these once your Daraja account is fixed)
-# MPESA_CONSUMER_KEY = 'your_consumer_key_here'
-# MPESA_CONSUMER_SECRET = 'your_consumer_secret_here'
+# This is used when you run 'collectstatic' for production
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# # 3. Shortcode & Passkey 
-# # These are the standard Safaricom Sandbox test credentials
-# MPESA_EXPRESS_SHORTCODE = '174379'
-# MPESA_SHORTCODE = '174379'
-# MPESA_PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
-# # 4. Security & Access
-# # Add your Ngrok URL here when testing callbacks
-# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.ngrok-free.app']
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# # CSRF exemption for M-Pesa callbacks (Safaricom needs to post to your site)
-# CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
+# Authentication Settings
+LOGIN_URL = 'login'  # Added this so @login_required knows where to redirect
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
