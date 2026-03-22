@@ -1,45 +1,40 @@
 import requests
 from requests.auth import HTTPBasicAuth
-from django.conf import settings
 from datetime import datetime
 import base64
 
-def get_access_token():
-    consumer_key = settings.MPESA_CONSUMER_KEY
-    consumer_secret = settings.MPESA_CONSUMER_SECRET
-    api_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-    
-    r = requests.get(api_URL, auth=HTTPBasicAuth(consumer_key, consumer_secret))
-    return r.json()['access_token']
+# SANDBOX CREDENTIALS (Use these until Daraja opens)
+BUSINESS_SHORTCODE = "174379"
+PASSKEY = "bfb279f9aa9cdcf1d1541bf246b4c3f55145627216a8073c8b40971c0b363307"
+CONSUMER_KEY = "YOUR_SANDBOX_KEY" # Get this when portal opens
+CONSUMER_SECRET = "YOUR_SANDBOX_SECRET"
 
-def send_stk_push(phone_number, amount):
+def get_access_token():
+    url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    response = requests.get(url, auth=HTTPBasicAuth(CONSUMER_KEY, CONSUMER_SECRET))
+    return response.json()['access_token']
+
+def trigger_stk_push(phone_number, amount, resume_id):
     access_token = get_access_token()
-    api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-    
-    # M-Pesa specific credentials
-    business_short_code = settings.MPESA_SHORTCODE
-    passkey = settings.MPESA_PASSKEY
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    password = base64.b64encode((BUSINESS_SHORTCODE + PASSKEY + timestamp).encode()).decode()
     
-    # Generate Password: base64(shortcode + passkey + timestamp)
-    password_str = business_short_code + passkey + timestamp
-    password = base64.b64encode(password_str.encode()).decode('utf-8')
-    
+    url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
     headers = {"Authorization": f"Bearer {access_token}"}
     
     payload = {
-        "BusinessShortCode": business_short_code,
+        "BusinessShortCode": BUSINESS_SHORTCODE,
         "Password": password,
         "Timestamp": timestamp,
         "TransactionType": "CustomerPayBillOnline",
         "Amount": amount,
-        "PartyA": phone_number, # The phone sending money
-        "PartyB": business_short_code,
+        "PartyA": phone_number, # e.g., 2547XXXXXXXX
+        "PartyB": BUSINESS_SHORTCODE,
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://yourdomain.com/mpesa/callback/", # Must be a public URL
-        "AccountReference": "NeuroCV",
-        "TransactionDesc": "CV Generation Fee"
+        "CallBackURL": f"https://your-domain.com/mpesa-callback/{resume_id}/",
+        "AccountReference": f"CV-{resume_id}",
+        "TransactionDesc": "Payment for Professional CV"
     }
     
-    response = requests.post(api_url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers)
     return response.json()

@@ -172,12 +172,22 @@
                 <input type="tel" name="phone" placeholder="+254 700 000 000">
             </div>
         </div>
-
 <div class="mb-3">
     <label class="form-label fw-bold">Professional Summary</label>
-    <textarea name="professional_summary" class="form-control" rows="4" placeholder="Write a catchy summary about yourself..."></textarea>
+    
+    <div class="mb-2">
+       <div class="mb-2">
+    <small class="text-muted d-block mb-1">Select a role to auto-fill:</small>
+    <button type="button" class="btn btn-sm btn-outline-primary mb-1" onclick="fillSummary('software')">Software Engineer</button>
+    <button type="button" class="btn btn-sm btn-outline-success mb-1" onclick="fillSummary('network')">Network Intern</button>
+    <button type="button" class="btn btn-sm btn-outline-info mb-1" onclick="fillSummary('data')">Data Analyst</button>
+    <button type="button" class="btn btn-sm btn-outline-warning mb-1" onclick="fillSummary('project')">Project Manager</button>
+    <button type="button" class="btn btn-sm btn-outline-dark mb-1" onclick="fillSummary('support')">IT Support</button>
 </div>
+    </div>
 
+    <textarea id="id_professional_summary" name="professional_summary" class="form-control" rows="5" placeholder="Write a catchy summary or use a suggestion above...">{{ resume.ai_summary }}</textarea>
+</div>
         <div class="section-title"><i class="fa-solid fa-graduation-cap"></i> Academic Excellence</div>
         <label>University / Institution</label>
         <input type="text" name="university" placeholder="e.g. University of Nairobi">
@@ -251,5 +261,30 @@
             <i class="fa-solid fa-wand-magic-sparkles"></i> Generate CV
         </button>
     </form>
-</div>
+</div> 
+<script>
+function fillSummary(type) {
+    const textarea = document.getElementById('id_professional_summary');
+    
+    // These are the professional paragraphs we talked about
+    const summaries = {
+        'software': "Dedicated Junior Software Engineer with a focus on designing and maintaining scalable web applications. Proven ability to write clean, efficient code and collaborate in Agile environments to optimize system performance. A resilient problem-solver—qualities sharpened both in complex debugging and on the rugby pitch.",
+        'network': "Proactive Network Intern with hands-on experience in troubleshooting technical issues and assisting in system optimization. Committed to maintaining high network uptime, industry-standard quality, and seamless team alignment to ensure project transparency.",
+        'data': "Detail-oriented Data Analyst intern with a strong foundation in SQL, Python, and data visualization. Passionate about transforming raw data into actionable insights to drive business decisions. Highly collaborative with a 'team-first' mentality developed through years of competitive rugby.",
+        'project': "Aspiring IT Project Manager with a background in software engineering. Skilled in coordinating cross-functional teams, managing sprint cycles, and ensuring technical documentation is accurate and up-to-date. Strong leadership and strategic execution skills honed on the rugby field.",
+        'support': "Customer-focused IT Support Specialist with a knack for resolving complex technical hardware and software issues. Excellent communicator who thrives in high-pressure environments, bringing the same grit and resilience found in high-level rugby to every technical challenge."
+    };
+
+    if (summaries[type]) {
+        textarea.value = summaries[type];
+        // Optional: Add a small visual feedback
+        textarea.style.backgroundColor = "#f0f9ff";
+        setTimeout(() => textarea.style.backgroundColor = "white", 500);
+    }
+}
+
+function clearSummary() {
+    document.getElementById('id_professional_summary').value = "";
+}
+</script>
 {% endblock %}

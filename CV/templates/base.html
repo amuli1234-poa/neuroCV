@@ -54,10 +54,11 @@
                     <button type="submit" style="background:none; border:none; color:#cbd5e1; font-family:inherit; font-size:inherit; cursor:pointer; font-weight:500; padding:0;">
                         Logout ({{ user.username }})
                     </button>
-                </form>
-            {% else %}
+                      {% else %}
                 <a href="{% url 'login' %}">Login</a>
             {% endif %}
+                </form>
+          
 
             <a href="/admin/" target="_blank">Admin Panel</a>
         </div>

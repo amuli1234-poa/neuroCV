@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-lg border-0 p-5" style="border-radius: 20px;">
+                <div class="mb-4">
+                    <i class="bi bi-exclamation-octagon text-danger" style="font-size: 4rem;"></i>
+                </div>
+                
+                <h2 class="fw-bold text-dark">Payment Not Completed</h2>
+                <p class="text-muted fs-5">
+                    We couldn't process your payment for <br>
+                    <strong>{{ resume.full_name }}'s CV</strong>.
+                </p>
+                
+                <div class="alert alert-danger border-0 small text-start">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Common reasons for failure:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>The transaction was cancelled on the phone.</li>
+                        <li>Insufficient M-Pesa balance.</li>
+                        <li>Safaricom Daraja system is currently busy.</li>
+                    </ul>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'initiate_payment' resume.pk %}" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill">
+                        Return to Workspace
+                    </a>
+                </div>
+                
+                <p class="mt-4 extra-small text-muted">
+                    Need help? Contact support at <strong>support@neurocv.co.ke</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #fef2f2; } /* Light red background */
+    .btn-primary { background-color: #2563eb; border: none; }
+</style>
+{% endblock %}

@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required # <--- ADD THIS
 from .models import Resume
 import logging
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .mpesa import trigger_stk_push # The file we created earlier
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -51,10 +55,10 @@ def neuroCV(request):
 
     return render(request, 'neuroCV/neuroCV.html')
 
-@login_required # <--- Protects the dashboard
+@login_required
 def dashboard(request):
-    # Fetch all resumes ordered by newest first
-    resumes = Resume.objects.all().order_by('-id') 
+    # Filter resumes so users only see their own
+    resumes = Resume.objects.filter(user=request.user) 
     return render(request, 'neuroCV/dashboard.html', {'cvs': resumes})
 
 @login_required # <--- Protects resume details
@@ -84,3 +88,50 @@ def edit_resume(request, pk):
         return redirect('dashboard')
     
     return render(request, 'neuroCV/edit_resume.html', {'resume': resume})
+
+
+@csrf_exempt
+def mpesa_callback(request, resume_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        result_code = data['Body']['stkCallback']['ResultCode']
+        
+        # ResultCode 0 means the transaction was successful
+        if result_code == 0:
+            try:
+                resume = Resume.objects.get(id=resume_id)
+                resume.is_paid = True # Unlock the PDF
+                resume.save()
+                return JsonResponse({"status": "Success"}, status=200)
+            except Resume.DoesNotExist:
+                return JsonResponse({"status": "Resume not found"}, status=404)
+        
+        return JsonResponse({"status": "Payment Failed or Cancelled"}, status=200)
+   
+
+
+@login_required
+def initiate_payment(request, pk):
+    resume = get_object_or_404(Resume, pk=pk, user=request.user)
+    
+    # In a real app, you might have a 'phone' field in a UserProfile model
+    # For now, we can use the phone number attached to the CV
+    phone_number = resume.phone 
+    
+    # Clean the phone number (Safaricom needs 2547XXXXXXXX)
+    # This logic assumes the user entered 07... or +254...
+    clean_phone = phone_number.replace("+", "").replace(" ", "")
+    if clean_phone.startswith("0"):
+        clean_phone = "254" + clean_phone[1:]
+    
+    amount = 50 # Your price in KES
+    
+    # Trigger the M-Pesa Prompt
+    response = trigger_stk_push(clean_phone, amount, resume.id)
+    
+    if response.get("ResponseCode") == "0":
+        # Successfully sent the prompt to the phone
+        return render(request, 'neuroCV/payment_pending.html', {'resume': resume})
+    else:
+        # Something went wrong (e.g., Daraja is down)
+        return render(request, 'neuroCV/payment_failed.html', {'error': response.get("ResponseDescription")})

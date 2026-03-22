@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-lg border-0 p-5" style="border-radius: 20px;">
+                <div class="spinner-grow text-success mb-4" role="status" style="width: 4rem; height: 4rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                
+                <h2 class="fw-bold text-dark">Check Your Phone! 📱</h2>
+                <p class="text-muted fs-5">
+                    We've sent an M-Pesa STK Push to <br>
+                    <span class="badge bg-light text-dark p-2 mt-2 border">{{ resume.phone }}</span>
+                </p>
+                
+                <div class="alert alert-info border-0 small">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Please enter your M-Pesa PIN to complete the <strong>Ksh 50</strong> payment and unlock your professional CV.
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                        I've Paid, Show My CV
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-link text-decoration-none text-muted">
+                        Cancel and return to Workspace
+                    </a>
+                </div>
+                
+                <p class="mt-4 extra-small text-muted">
+                    <i class="bi bi-shield-check"></i> Secure payment processed via Safaricom Daraja
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f8fafc; }
+    .extra-small { font-size: 0.75rem; }
+    .btn-primary { background-color: #2563eb; border: none; }
+    .btn-primary:hover { background-color: #1d4ed8; }
+</style>
+{% endblock %}
